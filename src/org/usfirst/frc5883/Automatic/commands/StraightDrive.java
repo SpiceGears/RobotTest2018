@@ -35,12 +35,14 @@ public class StraightDrive extends Command {
     protected void initialize() {
     	Robot.driveTrain.resetGyro();
     	Robot.driveTrain.resetEncoder();
-    	Robot.driveTrain.speedometer();
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	Robot.driveTrain.driveStraight(0.5, 1);
+   	Robot.driveTrain.driveStraight(0.5, 1);
+    	
+    //	Robot.driveTrain.driveSpeed(0.5);
+    	
     }
 
     // Make this return true when this Command no longer needs to run execute()
