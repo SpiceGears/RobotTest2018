@@ -3,7 +3,10 @@ package org.usfirst.frc5883.Automatic.subsystems;
 
 import org.usfirst.frc5883.Automatic.Robot;
 import org.usfirst.frc5883.Automatic.RobotMap;
+import org.usfirst.frc5883.Automatic.commands.CheesyDrive;
 import org.usfirst.frc5883.Automatic.commands.Drive;
+import org.usfirst.frc5883.Automatic.controllers.DrivetrainController;
+import org.usfirst.frc5883.Automatic.controllers.ProfileDriveController;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
@@ -31,8 +34,10 @@ public class DriveTrain extends Subsystem {
     
     private long oldTime;
     private double speed = 0;
-    private double powerForSpeed = 0;
+    private double powerForSpeed = 0; 
    
+    DrivetrainController controller;
+    
     public DriveTrain() {
         
     	encoder.setMaxPeriod(.1);
@@ -48,7 +53,7 @@ public class DriveTrain extends Subsystem {
     public void initDefaultCommand() {
        
 
-    	setDefaultCommand(new Drive());
+    	setDefaultCommand(new CheesyDrive());
 
 	}
 
@@ -66,6 +71,17 @@ public class DriveTrain extends Subsystem {
     	}
     	
     	robotDrive41.arcadeDrive(speed, gyro.getAngle()*0.08);
+    }
+    public void setSpeedRobotTankDrive(double left, double right) {
+    	if(actualSpeed() < left) {
+    		powerForSpeed = powerForSpeed + (actualSpeed()-speed)*0.3;
+    	}
+    	else if(actualSpeed() > left) {
+    		powerForSpeed = powerForSpeed - (actualSpeed()-speed)*0.5;
+    	}
+    	
+    	robotDrive41.tankDrive(speed, gyro.getAngle()*0.08);
+
     }
     
     
@@ -161,5 +177,16 @@ public class DriveTrain extends Subsystem {
     	SmartDashboard.putNumber("Speedometer", speedometer);
     	return speedometer;
     }
+    public void setTankDrive(double left, double right) {
+    	robotDrive41.tankDrive(left, right);
+    }
+    public double getAngle() {
+    	return gyro.getAngle();
+    }
+
+	public void setController(ProfileDriveController controller) {
+		this.controller = controller;
+		
+	}
 }
 

@@ -1,6 +1,8 @@
 package org.usfirst.frc5883.Automatic.commands;
 
 import org.usfirst.frc5883.Automatic.Robot;
+import org.usfirst.frc5883.Automatic.controllers.ProfileDriveController;
+import org.usfirst.frc5883.Automatic.motion.TrapezoidalMotionProfile;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -8,35 +10,44 @@ import edu.wpi.first.wpilibj.command.Command;
  *
  */
 public class DriveDistance extends Command {
+
+	TrapezoidalMotionProfile profile;
+	double vf = 0;
+	double distance;
 	
-	private double metersToDrive = 0.5;
+	public DriveDistance(double distance, double maxV, double maxAcc) {
+		requires(Robot.driveTrain);
+		profile = new TrapezoidalMotionProfile(distance, maxV, maxAcc);
+		this.distance = distance;
+	}
 	
-    public DriveDistance(double metersToDrive) {
-    	this.metersToDrive = metersToDrive;
-    }
+	public DriveDistance(double distance, double maxV, double maxAcc, double vi, double vf) {
+		requires(Robot.driveTrain);
+		profile = new TrapezoidalMotionProfile(distance, maxV, maxAcc, vi, vf);
+		this.vf = vf;
+		this.distance = distance;
+	}
+	
+	@Override
+	protected void initialize() {
+		Robot.driveTrain.resetEncoder();
+		ProfileDriveController controller = new ProfileDriveController(profile, Robot.driveTrain.getAngle());
+		
+		Robot.driveTrain.setController(controller);
+		//Robot.driveTrain.setMode(Drivetrain.Mode.CONTROLLED);
+	}
 
-
-    protected void initialize() {
-    	
-    	Robot.driveTrain.resetEncoder();
-    	
-    }
-
-    // Called repeatedly when this Command is scheduled to run
-    protected void execute() {
-    }
-
-    // Make this return true when this Command no longer needs to run execute()
-    protected boolean isFinished() {
-        return Robot.driveTrain.getDistanceInMeters() >= metersToDrive;
-    }
-
-    // Called once after isFinished returns true
-    protected void end() {
-    }
-
-    // Called when another command which requires one or more of the same
-    // subsystems is scheduled to run
-    protected void interrupted() {
-    }
+	@Override
+	protected boolean isFinished() {
+		return Robot.driveTrain.getDistanceInMeters() >= distance;
+	}
+	
+	protected void end() {
+			Robot.driveTrain.setTankDrive(0, 0);
+	}
+	
+	public DriveDistance timeout(double t) {
+		setTimeout(t);
+		return this;
+	}
 }
