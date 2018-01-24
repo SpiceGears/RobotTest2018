@@ -8,9 +8,8 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 public class DriveAndBack extends CommandGroup {
 
     public DriveAndBack() {
-        addSequential(new DriveStraightPID(0.2, 0.01, 30, 4, 1));
-        addSequential(new DriveStraightPID(-0.2, 0.01, 30, -4, -1));
-        // To run multiple commands at the same time,
+        addSequential(new DriveDistance(7, 2.5, 3.5));
+        addSequential(new DriveDistance(-7, 2.5, 3.5));
         // use addParallel()
         // e.g. addParallel(new Command1());
         //      addSequential(new Command2());

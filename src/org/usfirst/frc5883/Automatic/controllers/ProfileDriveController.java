@@ -30,6 +30,7 @@ public class ProfileDriveController implements DrivetrainController {
 	public void start(double theta) {
 		startT = Timer.getFPGATimestamp();
 		this.startTheta = theta;
+		Robot.driveTrain.resetGyro();
 	}
 	
 	@Override
@@ -46,9 +47,9 @@ public class ProfileDriveController implements DrivetrainController {
 		
 		linearError = error;
 		double turn = (Robot.driveTrain.getAngle() -startTheta)*constants.DriveProfile_theta_kP;
-		Robot.driveTrain.setTankDrive(output-turn, output+turn);
-		SmartDashboard.putNumber("Output-turn", output-turn);
-		SmartDashboard.putNumber("Output+turn", output+turn);
+		Robot.driveTrain.setSpeedRobot(output);
+		SmartDashboard.putNumber("Output", output);
+		//SmartDashboard.putNumber("Turn", turn);
 		
 		return t >= profile.getDuration() && Math.abs(error) < constants.AllowedDriveError;
 	}

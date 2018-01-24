@@ -1,12 +1,14 @@
 
 package org.usfirst.frc5883.Automatic.subsystems;
 
+import org.usfirst.frc5883.Automatic.Constants;
 import org.usfirst.frc5883.Automatic.Robot;
 import org.usfirst.frc5883.Automatic.RobotMap;
 import org.usfirst.frc5883.Automatic.commands.CheesyDrive;
 import org.usfirst.frc5883.Automatic.commands.Drive;
 import org.usfirst.frc5883.Automatic.controllers.DrivetrainController;
 import org.usfirst.frc5883.Automatic.controllers.ProfileDriveController;
+import org.usfirst.frc5883.Automatic.motion.SpeedPID;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
@@ -31,21 +33,24 @@ public class DriveTrain extends Subsystem {
     public final Encoder encoder = new Encoder(2, 3, true, EncodingType.k4X);
     public ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     
-    
+    private Constants constants; 
     private long oldTime;
     private double speed = 0;
     private double powerForSpeed = 0; 
+    private boolean onTarget;
+    private SpeedPID speedPID;
    
     DrivetrainController controller;
     
     public DriveTrain() {
-        
+    	
+        speedPID = new SpeedPID();
     	encoder.setMaxPeriod(.1);
     	encoder.setMinRate(10);
     	encoder.setDistancePerPulse(1);
     	encoder.setReverseDirection(true);
     	encoder.setSamplesToAverage(7);
-    	
+    	constants = Constants.getConstants();
     	SmartDashboard.putNumber("Dystans w metrach", getDistanceInMeters());
 
     }
@@ -63,27 +68,22 @@ public class DriveTrain extends Subsystem {
     }
     
     public void setSpeedRobot(double speed) {
-    	if(actualSpeed() < speed) {
-    		powerForSpeed = powerForSpeed + (actualSpeed()-speed)*0.3;
-    	}
-    	else if(actualSpeed() > speed) {
-    		powerForSpeed = powerForSpeed - (actualSpeed()-speed)*0.5;
-    	}
-    	
-    	robotDrive41.arcadeDrive(speed, gyro.getAngle()*0.08);
+        SmartDashboard.putNumber("Speed z Trapezu", speed);
+        
+        if (actualSpeed() < speed) {
+        	powerForSpeed += 0.01;
+        }else if (actualSpeed() >= speed) {
+        	powerForSpeed -= 0.01;
+        } else {
+        	powerForSpeed = 0;
+        }
+        
+        SmartDashboard.putNumber("Speed na silniki", powerForSpeed);
+        
+    	robotDrive41.arcadeDrive(speedPID.calculate(speed, actualSpeed()), gyro.getAngle()*constants.Gyro_kP);
+        //robotDrive41.arcadeDrive(powerForSpeed, gyro.getAngle()*constants.Gyro_kP);
     }
-    public void setSpeedRobotTankDrive(double left, double right) {
-    	if(actualSpeed() < left) {
-    		powerForSpeed = powerForSpeed + (actualSpeed()-speed)*0.3;
-    	}
-    	else if(actualSpeed() > left) {
-    		powerForSpeed = powerForSpeed - (actualSpeed()-speed)*0.5;
-    	}
-    	
-    	robotDrive41.tankDrive(speed, gyro.getAngle()*0.08);
 
-    }
-    
     
     public void driveStraight(double speed, double dystansMeter){
     	
@@ -141,24 +141,16 @@ public class DriveTrain extends Subsystem {
     	
     }
     
-    public void driveSpeed(double setPointSpeed) {
-    	
-    	if(setPointSpeed < actualSpeed()) {
-    		speed = speed - 0.05;
-    	}
-    	else if(setPointSpeed > actualSpeed()) {
-    		speed = speed + 0.05;
-    	}
-    	if(speed > 1) {
-    		speed = 1;
-    	}
-    	else if(speed < -1) {
-    		speed = -1;
-    	}
-    	robotDrive41.arcadeDrive(0.5, gyro.getAngle()*0.05);
-    }
     
-    public void stopDrive(){
+    public void updateAuto() {
+    	if (controller != null) {
+    		onTarget = controller.update();
+    	}
+    	
+	}
+    
+    @SuppressWarnings("deprecation")
+	public void stopDrive(){
     	robotDrive41.arcadeDrive(0, 0);
     }
     public void resetGyro(){
@@ -177,6 +169,7 @@ public class DriveTrain extends Subsystem {
     	SmartDashboard.putNumber("Speedometer", speedometer);
     	return speedometer;
     }
+    
     public void setTankDrive(double left, double right) {
     	robotDrive41.tankDrive(left, right);
     }
@@ -185,8 +178,10 @@ public class DriveTrain extends Subsystem {
     }
 
 	public void setController(ProfileDriveController controller) {
-		this.controller = controller;
-		
+		this.controller = controller;	
 	}
+	
+	
+	
 }
 

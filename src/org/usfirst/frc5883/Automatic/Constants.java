@@ -12,40 +12,23 @@ public class Constants {
 	
 	public static Constants getConstants() {		
 		if ( instance == null ) {
-			File practiceBotFile = new File("/practice");
-			if ( practiceBotFile.exists() ) {
-				instance = new PracticeRobotConstants();
-				isPractice = true;
-			}
-			else
 				instance = new Constants();
 		}
 		return instance;
 	}
 	
-	public static boolean isPracticeRobot() {
-		return isPractice;
-	}
-	
-	// Wheelbase width in inches
-	public double WheelbaseWidth = 24;
-	
-	// Ticks / ft
-	// 4x encoding
-	// 256 ticks / rev
-	// 1:3 from output shaft to encoder
-	// 34:50 from gearbox output to drivetrain
-	// 4in wheel
-	// 12 inches -> 1 ft
-	public double DriveEncoder_TickConversion = (1.0/4.0)*(1.0/256.0)*(1.0/3.0)*(34.0/50.0)*(4.0*Math.PI)*(1.0/12.0);
-	
-	// Ticks/100ms -> ft/s
-	public double DriveEncoder_VelocityConversion = DriveEncoder_TickConversion * 10;
-	
 	public double DriveProfile_kV = 0.119;
 	public double DriveProfile_kA = 0;
-	public double DriveProfile_kP = 0.2;
+	public double DriveProfile_kP = 1;
 	public double DriveProfile_theta_kP = 0.03;
+	public double ToleranceDriveError = 0.05;
+	
+	public double Gyro_kP = 0.3;
+	
+	public double SpeedPIDkP = 0.8;
+	public double SpeedPIDkI = 0.3;
+	public double SpeedPIDkD = 0.000;
+	public double SpeedPIDkF = 0.1;
 	
 	public double TurnProfile_kV = 0.02;
 	public double TurnProfile_kA = 0;
@@ -82,42 +65,10 @@ public class Constants {
 	public double PivotTurnPID_kI = 0;
 	public double PivotTurnPID_kD = 0.002;
 
-	/* Flywheel constants */
-	/*
-	public double ShooterP = 1.5;//0.205; // 0.2
-	public double ShooterI = 0.0;
-	public double ShooterD = 2.5; // 0.33
-	public double ShooterF = 0.039; // 0.04
-	*/
-	public double ShooterP = 1;//0.205; // 0.2
-	public double ShooterI = 0.0;
-	public double ShooterD = 1; // 0.33
-	public double ShooterF = 0.0369; // 0.04
-	public int ShooterIZone = 0;
-
-	public double ShooterCloseRPM = 2650;
-	public double ShooterFarRPM = 2815;
-	
-	public double ShooterOverpowerOffset = 40;
-	public double ShooterOverpowerDuration = 0.3;
-
 	public double AllowedDriveError = 0.25; // 0.25
 	public double AllowedTurnError = 1.8;
 	public double AllowedTurnPIDError = 1.3;
 	public double AllowedPivotTurnError = 4.0;
-	
-	public int VisionServerPort = 9225;
-	public int VisionMjpegPort = 5800;
-	
-	public double ClimberStartSpeed = 0.25;
-	
-	public double HatVisionAlignP = 0.04;
-	
-	// RPM constantly subtracted
-	public double DriveAndShoot_ConstantRPMOffset = 40;
-	// RPM change per foot
-	public double DriveAndShoot_DistanceToRPMOffsetSlope = -100; 
-	
 
 	
 	

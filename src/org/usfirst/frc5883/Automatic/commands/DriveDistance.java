@@ -1,5 +1,6 @@
 package org.usfirst.frc5883.Automatic.commands;
 
+import org.usfirst.frc5883.Automatic.Constants;
 import org.usfirst.frc5883.Automatic.Robot;
 import org.usfirst.frc5883.Automatic.controllers.ProfileDriveController;
 import org.usfirst.frc5883.Automatic.motion.TrapezoidalMotionProfile;
@@ -14,7 +15,7 @@ public class DriveDistance extends Command {
 	TrapezoidalMotionProfile profile;
 	double vf = 0;
 	double distance;
-	
+	Constants constants;
 	public DriveDistance(double distance, double maxV, double maxAcc) {
 		requires(Robot.driveTrain);
 		profile = new TrapezoidalMotionProfile(distance, maxV, maxAcc);
@@ -32,14 +33,15 @@ public class DriveDistance extends Command {
 	protected void initialize() {
 		Robot.driveTrain.resetEncoder();
 		ProfileDriveController controller = new ProfileDriveController(profile, Robot.driveTrain.getAngle());
-		
+		constants = Constants.getConstants();
 		Robot.driveTrain.setController(controller);
 		//Robot.driveTrain.setMode(Drivetrain.Mode.CONTROLLED);
 	}
 
 	@Override
 	protected boolean isFinished() {
-		return Robot.driveTrain.getDistanceInMeters() >= distance;
+		
+		return Robot.driveTrain.getDistanceInMeters() >= distance-constants.ToleranceDriveError;
 	}
 	
 	protected void end() {

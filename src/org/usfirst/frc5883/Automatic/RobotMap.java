@@ -49,9 +49,9 @@ public class RobotMap {
         driveTrainSpeedController2 = new VictorSP(2);
         LiveWindow.addActuator("DriveTrain", "Speed Controller 2", (VictorSP) driveTrainSpeedController2);
         
+        
         driveTrainRobotDrive41 = new RobotDrive(driveTrainSpeedController0, driveTrainSpeedController1,
               driveTrainSpeedController2, driveTrainSpeedController3);
-        
         driveTrainRobotDrive41.setSafetyEnabled(true);
         driveTrainRobotDrive41.setExpiration(0.1);
         driveTrainRobotDrive41.setSensitivity(0.5);
