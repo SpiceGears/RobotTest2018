@@ -1,11 +1,9 @@
 package org.usfirst.frc5883.Automatic;
 
-import java.io.File;
-
-
 
 public class Constants {
 	
+	public static final double DRIVERotacion_kP = 0.4;
 	private static Constants instance;
 	private static boolean isPractice = false;
 	private static double visionReferenceDistance = 77.0; // 80.0, calibration distance when the front of the bumpers is aligned with the boiler-side of the key tape
