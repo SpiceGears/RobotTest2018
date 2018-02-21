@@ -3,10 +3,7 @@ package org.usfirst.frc5883.Automatic;
 
 public class Constants {
 	
-	public static final double DRIVERotacion_kP = 0.4;
 	private static Constants instance;
-	private static boolean isPractice = false;
-	private static double visionReferenceDistance = 77.0; // 80.0, calibration distance when the front of the bumpers is aligned with the boiler-side of the key tape
 	
 	public static Constants getConstants() {		
 		if ( instance == null ) {
@@ -15,13 +12,19 @@ public class Constants {
 		return instance;
 	}
 	
+	private String gameData = null;
+	
+	public double MaxSpeedOnScaledrive = 0.2;
+	public static final double DRIVERotacion_kP = 0.3;
+	public double maxTurnValue = 0.35;
+	
 	public double DriveProfile_kV = 0.119;
 	public double DriveProfile_kA = 0;
 	public double DriveProfile_kP = 1;
 	public double DriveProfile_theta_kP = 0.03;
-	public double ToleranceDriveError = 0.05;
+	public double ToleranceDriveError = 0.1;
 	
-	public double Gyro_kP = 0.3;
+	public double Gyro_kP = 0.19;
 	
 	public double SpeedPIDkP = 0.8;
 	public double SpeedPIDkI = 0.3;
@@ -30,7 +33,7 @@ public class Constants {
 	
 	public double TurnProfile_kV = 0.02;
 	public double TurnProfile_kA = 0;
-	public double TurnProfile_kP = -0.059;
+	public double TurnProfile_kP = -0.049;
 	
 	public double TurnPID_kP = 0.045; // 0.059
 	public double TurnPID_kI = 0.00000015; // 0
@@ -59,30 +62,42 @@ public class Constants {
 	public double DriveRampRate = 120;
 	
 	
-	public double PivotTurnPID_kP = 0.05;
-	public double PivotTurnPID_kI = 0;
-	public double PivotTurnPID_kD = 0.002;
+	public double PivotTurnPID_kP = 0.003; //0.008
+	public double PivotTurnPID_kI = 0.0002; //0.0003
+	public double PivotTurnPID_kD = 0.003; //0.004
 
 	public double AllowedDriveError = 0.25; // 0.25
 	public double AllowedTurnError = 1.8;
 	public double AllowedTurnPIDError = 1.3;
 	public double AllowedPivotTurnError = 4.0;
 
-	
-	
-	public static class PracticeRobotConstants extends Constants {	
-	}
-	
-	
-	public static class ClosedLoopDriveParams {
-		public double kP, kD, kF;
-		public double maxVelocity;
+	//Elevator
+		public double elevatorIntake = 0;
+		public double elevatorSwitch = 0.40;
+		public double elevatorScale = 0.71;
 		
-		public ClosedLoopDriveParams(double kP, double kD, double kF) {
-			this.kP = kP;
-			this.kD = kD;
-			this.kF = kF;
-			maxVelocity = 1023.0 / kF;
+		public double elevator_kP = 1;
+		public double elevator_kI = 0.01;
+		public double elevator_kD = 71;
+		
+		public double allowedElevatorError = 0.02;
+		public double ElevatorProfile_kV = 0.5;
+		public double ElevatorProfile_kA = 0;
+		public double ElevatorProfile_kP = 1;
+		public double ElevatorProfile_theta_kP = 0.03;
+		
+		public double ElevatorProfile_MaxV = 2;
+		public double ElevatorProfile_MaxA = 0.7;
+		
+		public double debug = 0;
+		public double climbingPrepare = 1000;
+		public double climbing = 2000;
+
+		public String getGameData() {
+			return gameData;
 		}
-	}
+		public void setGameData(String gameData) {
+			this.gameData = gameData;
+		}
+
 }

@@ -49,7 +49,10 @@ public class ProfileDriveController implements DrivetrainController {
 		double turn = (Robot.driveTrain.getAngle() -startTheta)*constants.DriveProfile_theta_kP;
 		Robot.driveTrain.setSpeedRobot(output);
 		SmartDashboard.putNumber("Output", output);
-		//SmartDashboard.putNumber("Turn", turn);
+		
+		
+		Robot.elevator.update();
+		
 		
 		return t >= profile.getDuration() && Math.abs(error) < constants.AllowedDriveError;
 	}

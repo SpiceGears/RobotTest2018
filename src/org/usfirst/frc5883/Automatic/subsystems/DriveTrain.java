@@ -1,10 +1,10 @@
-
 package org.usfirst.frc5883.Automatic.subsystems;
 
 import org.usfirst.frc5883.Automatic.Constants;
+import org.usfirst.frc5883.Automatic.PortMap;
 import org.usfirst.frc5883.Automatic.Robot;
 import org.usfirst.frc5883.Automatic.RobotMap;
-import org.usfirst.frc5883.Automatic.commands.Drive;
+import org.usfirst.frc5883.Automatic.commands.drivetrain.Drive;
 import org.usfirst.frc5883.Automatic.controllers.DrivetrainController;
 import org.usfirst.frc5883.Automatic.controllers.ProfileDriveController;
 import org.usfirst.frc5883.Automatic.motion.SpeedPID;
@@ -14,14 +14,12 @@ import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick.ButtonType;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
-/**
- *
- */
 public class DriveTrain extends Subsystem {
 
     private final SpeedController speedController3 = RobotMap.driveTrainSpeedController3;
@@ -29,8 +27,9 @@ public class DriveTrain extends Subsystem {
     private final SpeedController speedController1 = RobotMap.driveTrainSpeedController1;
     private final SpeedController speedController2 = RobotMap.driveTrainSpeedController2;
     private final RobotDrive robotDrive41 = RobotMap.driveTrainRobotDrive41;
-    public final Encoder encoder = new Encoder(10, 11, true, EncodingType.k4X);
-    public ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+    public final Encoder encoderRight = new Encoder(18, 19);
+    private final Encoder encoderLeft = new Encoder(16, 17, true);
+    public ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     
     private Constants constants; 
     private long oldTime = 0;
@@ -44,42 +43,51 @@ public class DriveTrain extends Subsystem {
     public DriveTrain() {
     	
         speedPID = new SpeedPID();
-    	encoder.setMaxPeriod(.1);
-    	encoder.setMinRate(10);
-    	encoder.setDistancePerPulse(1);
-    	encoder.setReverseDirection(false);
-    	encoder.setSamplesToAverage(7);
+    	encoderRight.setMaxPeriod(.1);
+    	encoderRight.setMinRate(10);
+    	encoderRight.setDistancePerPulse(1);
+    	encoderRight.setReverseDirection(false);
+    	encoderRight.setSamplesToAverage(7);
+    	encoderLeft.setMaxPeriod(.1);
+    	encoderLeft.setMinRate(10);
+    	encoderLeft.setDistancePerPulse(1);
+    	encoderLeft.setSamplesToAverage(7);
     	constants = Constants.getConstants();
-    	SmartDashboard.putNumber("Dystans w metrach", getDistanceInMeters());
+    	//SmartDashboard.putNumber("Dystans w metrach", getDistanceInMeters());
 
     }
 
     public void initDefaultCommand() {
-       
 
     	setDefaultCommand(new Drive());
-
 	}
 
     public double getDistanceInMeters(){
-    	return encoder.getDistance()/4332;
+    	return encoderRight.getDistance()/4332;
     	
     }
     
     public void setSpeedRobot(double speed) {
         SmartDashboard.putNumber("Speed z Trapezu", speed);
         
-        if (actualSpeed() < speed) {
+        if (getActualSpeed() < speed) {
         	powerForSpeed += 0.01;
-        }else if (actualSpeed() >= speed) {
+        }else if (getActualSpeed() >= speed) {
         	powerForSpeed -= 0.01;
         } else {
         	powerForSpeed = 0;
         }
         
-        SmartDashboard.putNumber("Speed na silniki", speedPID.calculate(speed, actualSpeed()));
+        SmartDashboard.putNumber("Speed na silniki DriveTrain", speedPID.calculate(speed, getActualSpeed()));
+        double turn = (gyro.getAngle()*constants.Gyro_kP)*(1/getActualSpeed());
         
-    	robotDrive41.arcadeDrive(speedPID.calculate(speed, actualSpeed()), gyro.getAngle()*constants.Gyro_kP);
+        if(turn>constants.maxTurnValue) {
+        	turn = constants.maxTurnValue;
+        } else if(turn < -constants.maxTurnValue) {
+        	turn = -constants.maxTurnValue;
+        }
+        
+    	robotDrive41.arcadeDrive(speedPID.calculate(speed, getActualSpeed()), turn);
         //robotDrive41.arcadeDrive(powerForSpeed, gyro.getAngle()*constants.Gyro_kP);
     }
 
@@ -93,38 +101,46 @@ public class DriveTrain extends Subsystem {
     
     public void driveWithJoysticks(){
     	
-    	SmartDashboard.putNumber("encoder DriveTrain", encoder.getDistance());
+    	//SmartDashboard.putNumber("encoderRight DriveTrain", encoderRight.getDistance());
     	long newTime = System.currentTimeMillis();
-    	//SmartDashboard.putNumber("newTime", newTime);
     	double deltaTime = newTime - oldTime;
-    	double joySpeedValue = Robot.oi.getJoystick1().getRawAxis(1);
-    	 //SmartDashboard.putDouble("time new", newTime);
-    	 SmartDashboard.putNumber("encoder", getDistanceInMeters());
-    	 
-    	 
+    	double joySpeedValue = Robot.oi.getDriverJoystick().getRawAxis(1);
+    	 //SmartDashboard.putNumber("encoderRight", getDistanceInMeters());
+    	  
     	 //This value reach 100% power motor in 0,5s
     	 double speedAddicional = 0.1;
     	 speedAddicional = (deltaTime/50) * speedAddicional;
     	 
-    	 
-    	 
-    	 if(Math.abs(joySpeedValue) > 0.2){
+    	 if(Math.abs(joySpeedValue) < 0.2){
     		 joySpeedValue = 0;
     	 }
     	 
-    	 SmartDashboard.putNumber("speed acicional?", speedAddicional);
-    	 
-    	if(-Robot.oi.getJoystick1().getRawAxis(1) > speed){
+    	// SmartDashboard.putNumber("speed acicional?", speedAddicional);
+    	 if(Robot.elevator.getDistane() > constants.elevatorScale-0.1) {
+    		 
+    	 }
+    	if(-joySpeedValue > speed){
     		SmartDashboard.putNumber("delta50", deltaTime);
     		speed = speed + speedAddicional;
     		oldTime = System.currentTimeMillis();
-    	} else if (-Robot.oi.getJoystick1().getRawAxis(1) < speed){
+    	} else if (-joySpeedValue < speed){
     		speed = speed - speedAddicional; 
     		oldTime = System.currentTimeMillis();
     	} else {
     		speed = speed;
     		oldTime = System.currentTimeMillis();
     	 }
+    	
+    	SmartDashboard.putNumber("Aktualna predkosc robota", getActualSpeed());
+
+    	if(Robot.elevator.getDistane() > constants.elevatorScale-0.1) {
+   		 if(getActualSpeed() > constants.MaxSpeedOnScaledrive) {
+   			speed = speed - speedAddicional;
+   		 } else if(getActualSpeed() < -constants.MaxSpeedOnScaledrive) {
+   			speed = speed + speedAddicional;
+   		 }
+   		 
+   	 }
     	 
     	 if (speed > 1){
     		 speed = 1;
@@ -134,20 +150,39 @@ public class DriveTrain extends Subsystem {
     		speed = -1;
     	 }
     	 
-    	 double turn = Robot.oi.getJoystick1().getRawAxis(2) * constants.DRIVERotacion_kP;
     	 
+    	 
+    	 double turn = Robot.oi.getDriverJoystick().getRawAxis(4) * constants.DRIVERotacion_kP;
+     	
+    	 
+    	 
+    	 SmartDashboard.putData(encoderRight);
+    	 SmartDashboard.putData(encoderLeft);
+
+    	 
+    	 
+    	 if(Math.abs(turn) < 0.1){
+    		 turn = 0;
+    	 }
+    	 
+    	 if(speed < 0.2) {
+    		 turn *= 2;
+    	 }
     	 robotDrive41.tankDrive(speed + turn, speed - turn);
     	 
-    	 SmartDashboard.putNumber("DOBRE pryndkusc", actualSpeed());
-    	 
-    	 SmartDashboard.putNumber("DYNSTANS W METACH", getDistanceInMeters());
     }
     
-    
     public void updateAuto() {
+    	SmartDashboard.putNumber("Gyro", getAngle());
+    	
     	if (controller != null) {
     		onTarget = controller.update();
+    		SmartDashboard.putNumber("Update", 10);
+    	} else {
+    		onTarget = false;
     	}
+    	
+    	//SmartDashboard.putBoolean("ONTARGET", onTarget);
     	
 	}
     
@@ -157,17 +192,18 @@ public class DriveTrain extends Subsystem {
     }
     public void resetGyro(){
     	gyro.reset();
+    	Timer.delay(0.2);
     }
     public void resetSpeed(){
     	speed = 0;
     }
     
     public void resetEncoder(){
-    	encoder.reset();
+    	encoderRight.reset();
     }
     
-    public double actualSpeed(){
-    	double speedometer = encoder.getRate()/4332;
+    public double getActualSpeed(){
+    	double speedometer = encoderRight.getRate()/4332;
     	SmartDashboard.putNumber("Speedometer", speedometer);
     	return speedometer;
     }
@@ -179,9 +215,14 @@ public class DriveTrain extends Subsystem {
     	return gyro.getAngle();
     }
 
-	public void setController(ProfileDriveController controller) {
+	public void setController(DrivetrainController controller) {
 		this.controller = controller;	
 	}
+	
+	public DrivetrainController getDrivetrainController() {
+		return controller;
+	}
+	
 	public void arcadeDrive(double leftSpeed, double rightSpeed) {
 		speedController0.set(leftSpeed);
 		speedController1.set(leftSpeed);
@@ -189,6 +230,10 @@ public class DriveTrain extends Subsystem {
 		speedController3.set(rightSpeed);
 
 		}
+	public boolean isOnTarget() {
+		return onTarget;
+	}
+	
 	}
 	
 

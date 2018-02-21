@@ -53,6 +53,8 @@ public class ProfileTurnController implements DrivetrainController {
 		double output = (angularError * constants.TurnProfile_kP) + feedforward;
 		Robot.driveTrain.setTankDrive(output, -output);
 		
+		Robot.elevator.update();
+		
 		return t >= profile.getDuration();
 	}
 
