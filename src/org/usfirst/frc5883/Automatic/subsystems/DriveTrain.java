@@ -166,7 +166,7 @@ public class DriveTrain extends Subsystem {
     	 }
     	 
     	 if(speed < 0.2) {
-    		 turn *= 2;
+    		 turn *= 2.33; 
     	 }
     	 robotDrive41.tankDrive(speed + turn, speed - turn);
     	 

@@ -9,14 +9,22 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class DropMotors extends Command {
 
+	double speed = 1;
+	
     public DropMotors() {
-        requires(Robot.intakeMotors);    }
+        requires(Robot.intakeMotors); 
+        speed = 1;
+    }
+    
+    public DropMotors(double speed) {
+    	this.speed = speed;
+    }
 
     protected void initialize() {
     }
 
     protected void execute() {
-    	 Robot.intakeMotors.drop();
+    	 Robot.intakeMotors.drop(speed);
     }
 
     protected boolean isFinished() {

@@ -3,6 +3,7 @@ package org.usfirst.frc5883.Automatic.subsystems;
 import org.usfirst.frc5883.Automatic.PortMap;
 import org.usfirst.frc5883.Automatic.Robot;
 import org.usfirst.frc5883.Automatic.commands.intake.IntakeControl;
+import org.usfirst.frc5883.Automatic.controllers.ElevatorController;
 
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -14,8 +15,7 @@ public class IntakeMotors extends Subsystem {
 
 
     public void initDefaultCommand() {
-    	stop();
-       // setDefaultCommand(new IntakeControl());
+       
     }
     
     public void controlWithJoystick() {
@@ -39,6 +39,11 @@ public class IntakeMotors extends Subsystem {
     public void drop() {
     	intakeMotorleft.set(1);
     	intakeMotorRight.set(-1);
+    }
+    
+    public void drop(double speed) {
+    	intakeMotorleft.set(speed);
+    	intakeMotorRight.set(-speed);
     }
     
     public void stop() {

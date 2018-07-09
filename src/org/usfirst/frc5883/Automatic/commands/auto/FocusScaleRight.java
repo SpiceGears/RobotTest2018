@@ -37,7 +37,7 @@ public class FocusScaleRight extends CommandGroup {
     			addParallel(new CloseClaw());
     	    	addParallel(new DownIntakeTime(1.25));
     	    	
-    	    	addSequential(new DriveDistance(6, 7, 5, 0.5));
+    	    	addSequential(new DriveDistance(6.16, 7, 5, 0.5));
     	    	
     	    	addSequential(new ProfileTurnCommand(-30, 70, 70));
     	    	addParallel(new DropMotors());
@@ -47,7 +47,8 @@ public class FocusScaleRight extends CommandGroup {
     	    	addParallel(new DownIntakeTime(1));
     	    	addParallel(new ElevatorSetIntake());
     	    	addParallel(new OpenClaw());
-
+    	    	
+    	    	addParallel(new IntakeMotorIntake());
     	    	//Pobranie 2 cuba Very dobzie
     	    	//Podjazd do cuba
     	    	addSequential(new DriveDistance(1.35, 1.7, 0.5, 0.15));
@@ -62,32 +63,26 @@ public class FocusScaleRight extends CommandGroup {
 //    	    	
     	    	
     	    	//JESli swich jest nasz to go przejmujemy
-    	    	//if(gameData.charAt(0)== 'R') {
-//    	    		addParallel(new ElevatorSetSwitch());
-//    	    		
-//    	    		addSequential(new UpIntakeTime(0.5));
-//    	    		
-////    	    		//Drop
-//    	    		addParallel(new DropMotors());
-//    	    	}else if(gameData.charAt(1) == 'R') {
-//    	    		addParallel(new ElevatorSetScale());
-//    	    		addSequential(new ProfileTurnCommand(160, 60, 55));
-//    	    		addSequential(new DriveDistance(1.2, 5, 5, 0.4));
-//    	    		
-//    	    		//Drop
-//    	    		addParallel(new OpenClaw());
-//    	    	}
-//    			
+    	    	if(gameData.charAt(0)== 'R') {
+    	    	addParallel(new CloseClaw());
+    	    	
+     			addParallel(new ElevatorSetSwitch());
+     			addSequential(new WaitCommand(0.9));
+     			addParallel(new DriveDistance(0.20, 1, 1, 1));
+    	    	addParallel(new DropMotors());
     	    	} 
-    		//LEFT DO SWITCH
+    		//LEFT DO scale
     			else if (gameData.charAt(1)== 'L') {
     				
     				addSequential(new GoToOppositeScale(false));
     			
     			//Drop
-    				addSequential(new OpenClaw());
+    				addParallel(new OpenClaw());
     			//addParallel(new DownIntakeTime(1));
     		}
     	}
+    }else {
+    	addSequential( new DriveThreeMeter());
     }
+}
 }

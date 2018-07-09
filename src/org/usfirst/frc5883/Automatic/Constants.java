@@ -14,7 +14,7 @@ public class Constants {
 	
 	private String gameData = null;
 	
-	public double MaxSpeedOnScaledrive = 0.2;
+	public double MaxSpeedOnScaledrive = 0.4;
 	public static final double DRIVERotacion_kP = 0.3;
 	public double maxTurnValue = 0.35;
 	
@@ -73,8 +73,8 @@ public class Constants {
 
 	//Elevator
 		public double elevatorIntake = 0;
-		public double elevatorSwitch = 0.40;
-		public double elevatorScale = 0.71;
+		public double elevatorSwitch = 0.40+ 0.05;
+		public double elevatorScale = 0.71 + 0.07;
 		
 		public double elevator_kP = 1;
 		public double elevator_kI = 0.01;
@@ -92,6 +92,9 @@ public class Constants {
 		public double debug = 0;
 		public double climbingPrepare = 1000;
 		public double climbing = 2000;
+		
+		
+		public double turnTrapezoidalMultiply = 1.3;
 
 		public String getGameData() {
 			return gameData;

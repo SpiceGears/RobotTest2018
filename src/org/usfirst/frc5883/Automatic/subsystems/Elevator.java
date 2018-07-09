@@ -1,3 +1,4 @@
+
 package org.usfirst.frc5883.Automatic.subsystems;
 
 import org.usfirst.frc5883.Automatic.Constants;
@@ -98,7 +99,7 @@ public class Elevator extends Subsystem {
     	double speed = Robot.oi.getOperatorJoystick().getRawAxis(3);
     	
     	if (speed > 0) {
-    		speed *= 0.3;
+    		speed *= 1;
     	}
     	
     	if(encoder.getDistance() < -0.00) {

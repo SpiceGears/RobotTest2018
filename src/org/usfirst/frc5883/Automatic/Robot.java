@@ -1,5 +1,9 @@
 package org.usfirst.frc5883.Automatic;
 
+import edu.wpi.cscore.CvSink;
+import edu.wpi.cscore.CvSource;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -13,15 +17,22 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 
 import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 import org.usfirst.frc5883.Automatic.commands.*;
+import org.usfirst.frc5883.Automatic.commands.auto.Auto2481Left;
+import org.usfirst.frc5883.Automatic.commands.auto.Auto2481Right;
 import org.usfirst.frc5883.Automatic.commands.auto.DriveAndBack;
 import org.usfirst.frc5883.Automatic.commands.auto.DriveThreeMeter;
 import org.usfirst.frc5883.Automatic.commands.auto.FocusScaleLeft;
 import org.usfirst.frc5883.Automatic.commands.auto.FocusScaleRight;
-import org.usfirst.frc5883.Automatic.commands.auto.FocusScaleSwitchSide;
+import org.usfirst.frc5883.Automatic.commands.auto.FocusScaleOuSwitchSide;
+import org.usfirst.frc5883.Automatic.commands.auto.FocusSwitchSide;
 import org.usfirst.frc5883.Automatic.commands.auto.GoToOppositeScale;
 import org.usfirst.frc5883.Automatic.commands.auto.OpenIntakeAuto;
-import org.usfirst.frc5883.Automatic.commands.auto.SwitchAndExchangeMid;
+import org.usfirst.frc5883.Automatic.commands.auto.MidAuto;
+import org.usfirst.frc5883.Automatic.commands.auto.OnlyScaleLeft;
+import org.usfirst.frc5883.Automatic.commands.auto.OnlyScaleRight;
 import org.usfirst.frc5883.Automatic.commands.drivetrain.SpeedCommand;
 import org.usfirst.frc5883.Automatic.commands.drivetrain.StraightDrive;
 import org.usfirst.frc5883.Automatic.commands.intake.IntakeDown;
@@ -41,7 +52,7 @@ public class Robot extends IterativeRobot {
     public static IntakeMotors intakeMotors;
     public static OpenIntake openintake;
     public double debugowanie = 0;
-
+    public UsbCamera camera;
     public void robotInit() {
     	Constants.getConstants().setGameData("");
     	table = NetworkTable.getTable("Cube");
@@ -67,14 +78,41 @@ public class Robot extends IterativeRobot {
         //autoChooser.addObject("Test Command", new AutonomousCommand());
         //autoChooser.addObject("SpeedCommand", new SpeedCommand(5, 0.5));
         //autoChooser.addObject("DriveAndBack", new DriveAndBack());
-        autoChooser.addObject("ScaleLeft", "ScaleLeft");
-        autoChooser.addObject("ScaleRight", "ScaleRight");
-        autoChooser.addObject("ScaleSwitchRight", "ScaleSwitchRight");
-        autoChooser.addObject("Middle", "MID");
-        autoChooser.addObject("ScaleSwitchLeft" , "ScaleSwitchLeft");
+        //autoChooser.addObject("ScaleLeft", "ScaleLeft");
+        //autoChooser.addObject("ScaleRight", "ScaleRight");
+        autoChooser.addObject("MiddleGOOD", "MIDGOOD");
+        autoChooser.addObject("ScaleSwitchRightGOOD", "ScaleSwitchRightGOOD");
+        autoChooser.addObject("ScaleSwitchLeftGOOD" , "ScaleSwitchLeftGOOD");
+        //autoChooser.addObject("FokusSwitchRight", "FokusSwitchRight");
+       // autoChooser.addObject("FokusSwitchLeft", "FokusSwitchLeft");
         //autoChooser.addObject("IntakeDownTest", "4");
+        autoChooser.addObject("OnlyScaleRight", "OnlyScaleRight");
+        autoChooser.addObject("OnlyScaleLeft", "OnlyScaleLeft");
+        autoChooser.addObject("Auto2481Right", "Auto2481Right");
+        autoChooser.addObject("Auto2481Left", "Auto2481Left");
+        autoChooser.addObject("Nothing1", "Nothing1");
+
+        
         SmartDashboard.putData("Autonomous mode chooser", autoChooser );
         Robot.driveTrain.encoderRight.reset();
+        
+   	 new Thread(() -> {
+      camera = CameraServer.getInstance().startAutomaticCapture();
+      camera.setResolution(320, 240);
+      camera.setFPS(15);
+      camera.setBrightness(60);
+      CvSink cvSink = CameraServer.getInstance().getVideo();
+      CvSource outputStream = CameraServer.getInstance().putVideo("Blur", 320, 240);
+      
+      Mat source = new Mat();
+      Mat output = new Mat();
+      
+      while(!Thread.interrupted()) {
+          cvSink.grabFrame(source);
+          Imgproc.cvtColor(source, output, Imgproc.COLOR_BGR2GRAY);
+          outputStream.putFrame(output);
+      }
+  }).start();
       
     }
      
@@ -90,7 +128,7 @@ public class Robot extends IterativeRobot {
     	
     	
     	
-    	String gameData;
+    	String gameData = null;
     	gameData = DriverStation.getInstance().getGameSpecificMessage();
     	
     	int retries = 100;
@@ -98,7 +136,7 @@ public class Robot extends IterativeRobot {
     	while(gameData.length() < 2 && retries > 0) {
     		retries--;
     		try {
-				Thread.sleep(5);
+				Thread.sleep(25);
 			} catch (InterruptedException e) {
 				
 			}
@@ -118,18 +156,37 @@ public class Robot extends IterativeRobot {
 		case "ScaleRight":
 			autonomousCommand = new FocusScaleRight();
 			break;
-		case "MID":
-			autonomousCommand = new SwitchAndExchangeMid();
+		case "MIDGOOD":
+			autonomousCommand = new MidAuto();
 			break;
 		case "ScaleLeft":
 			autonomousCommand = new FocusScaleLeft();
 			break;
-		case "ScaleSwitchLeft":
-			autonomousCommand = new FocusScaleSwitchSide(true);
+		case "ScaleSwitchLeftGOOD":
+			autonomousCommand = new FocusScaleOuSwitchSide(true);
 			break;
-		case "ScaleSwitchRight":
-			autonomousCommand = new FocusScaleSwitchSide(false);
+		case "ScaleSwitchRightGOOD":
+			autonomousCommand = new FocusScaleOuSwitchSide(false);
 			break;
+		case "OnlyScaleRight":
+			autonomousCommand = new OnlyScaleRight();
+			break;
+		case "OnlyScaleLeft":
+			autonomousCommand = new OnlyScaleLeft();
+			break;
+		case "Auto2481Right":
+			autonomousCommand = new Auto2481Right();
+			break;
+		case "Auto2481Left":
+			autonomousCommand = new Auto2481Left();
+			break;
+		case "Nothing1":
+			autonomousCommand = null;
+			break;
+//		case "FokusSwitchLeft":
+//			autonomousCommand = new FocusSwitchSide(true);
+//			break;
+		
 		default:
 			autonomousCommand = new DriveThreeMeter();
 			break;
@@ -152,6 +209,8 @@ public class Robot extends IterativeRobot {
 
     public void teleopInit() {
     	driveTrain.resetSpeed();
+		//elevator.setDefaultCommand(new ElevatorControl());
+
         if (autonomousCommand != null) autonomousCommand.cancel();
     }
 

@@ -33,6 +33,7 @@ public class FocusScaleLeft extends CommandGroup {
     	{
     		//LEFT DO SCALE 
     		if(gameData.charAt(1)== 'L') {
+    			//Scale left from left
     			addParallel(new ElevatorSetScale());
     			addParallel(new CloseClaw());
     	    	addParallel(new DownIntakeTime(1.25));
@@ -56,6 +57,7 @@ public class FocusScaleLeft extends CommandGroup {
     	    	} 
 
     			else if (gameData.charAt(1)== 'R') {
+    				//Oposite scale from left
     				
     				addSequential(new GoToOppositeScale(true));
     			
